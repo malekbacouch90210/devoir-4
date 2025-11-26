@@ -32,6 +32,51 @@ services:
     networks:
       - spring-cloud-network
 
+  demographie-ms:
+    build: ./demographie-microservice
+    container_name: demographie-ms
+    ports:
+      - "8085:8085"
+    environment:
+      - DISCOVERY_SERVICE_URL=http://eurekaserver:8761/eureka
+      - CONFIG_SERVICE_URL=http://configserver:9999
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8085/actuator/health | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    networks:
+      - spring-cloud-network
+
+  demographie-ms2:
+    build: ./demographie-microservice
+    container_name: demographie-ms2
+    ports:
+      - "8089:8085"
+    environment:
+      - DISCOVERY_SERVICE_URL=http://eurekaserver:8761/eureka
+      - CONFIG_SERVICE_URL=http://configserver:9999
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail --silent localhost:8085/actuator/health | grep UP || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    networks:
+      - spring-cloud-network
+
+
   manga-ms:
     build: ./manga-microservice
     container_name: manga-ms
@@ -51,8 +96,11 @@ services:
         condition: service_healthy
       configserver:
         condition: service_healthy
+      demographie-ms:  # ✅ Manga attend Demographie (pas l'inverse!)
+        condition: service_healthy
     networks:
       - spring-cloud-network
+
   gatewayserver:
     build: ./getawayserver
     container_name: gatewayserver
@@ -62,7 +110,7 @@ services:
       - DISCOVERY_SERVICE_URL=http://eurekaserver:8761/eureka
       - CONFIG_SERVICE_URL=http://configserver:9999
     healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent localhost:8888/actuator/health | grep UP || exit 1" ]
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8888/actuator/health | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -72,35 +120,13 @@ services:
         condition: service_healthy
       configserver:
         condition: service_healthy
-    networks:
-      - spring-cloud-network
-
-
-  demographie-ms:
-    build: ./demographie-microservice
-    container_name: demographie-ms
-    ports:
-      - "8085:8085"
-    environment:
-      - DISCOVERY_SERVICE_URL=http://eurekaserver:8761/eureka
-      - CONFIG_SERVICE_URL=http://configserver:9999
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent localhost:8085/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 40s
-    depends_on:
-      eurekaserver:
+      manga-ms:
         condition: service_healthy
-      configserver:
-        condition: service_healthy
-      manga-ms: #  <<<<<<<<<<<<<< AJOUTER CECI
+      demographie-ms:
         condition: service_healthy
     networks:
       - spring-cloud-network
 
-# ADD THIS PART
 networks:
   spring-cloud-network:
     driver: bridge

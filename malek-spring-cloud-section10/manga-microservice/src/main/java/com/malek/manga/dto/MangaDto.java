@@ -11,5 +11,6 @@ public class MangaDto {
     private Long id;
     private String MangaName;
     private String Mangaka;
+    private String demoName;
     private String demoCode;
 }

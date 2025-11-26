@@ -1,0 +1,42 @@
+server:
+  port: 9999
+spring:
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "guest"
+    password: "guest"
+  application:
+    name: configserver
+  profiles:
+#    active: native
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/malekbacouch90210/config-repo
+          default-label: main
+          clone-on-start: true
+          timeout: 30  # délai pour cloner le repo git
+#        native:
+          # search-locations: "classpath:/config"
+#          search-locations: file:///D:/Cours IT/IntelliJ_Idea workspace/Spring/Spring_cloud/malek-spring-cloud/config-repo
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+
+
+# Timeout pour éviter les erreurs de délai lors du démarrage ou de la connexion Git
+spring.mvc.async.request-timeout: 60000
+server.tomcat.connection-timeout: 60000
+
+
+
